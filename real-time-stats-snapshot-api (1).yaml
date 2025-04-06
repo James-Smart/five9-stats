@@ -1,0 +1,2216 @@
+openapi: 3.0.3
+info:
+  title: Real Time Statistics API
+  description: "Available for Beta customers only, contact Five9 for more information.\
+    \  The **Real Time Snapshot Statistics API** provides insights for live interactions\
+    \ within your contact center, offering a real-time \"picture\" of activity. You\
+    \ can retrieve statistics for domains, agents, interactions, campaigns, and utilization\
+    \ thresholds."
+  contact:
+    name: Five9 Support
+    url: https://community.five9.com/
+  license:
+    name: Five9
+  version: 2.1.5
+servers:
+- url: https://api.prod.us.five9.net
+  description: API endpoint for US production domains
+- url: https://api.alpha.us.five9.net
+  description: API base endpoint for US alpha domains
+- url: https://api.prod.ca.five9.net
+  description: API base endpoint for CA production domains
+- url: https://api.prod.eu.five9.net
+  description: API base endpoint for EU production domains
+- url: https://api.prod.in.five9.net
+  description: API base endpoint for India production domains
+- url: https://api.prod.uk.five9.net
+  description: API base endpoint for UK production domains
+tags:
+- name: statistics
+- name: campaign-resources
+- name: campaign-profiles
+- name: domain-settings
+paths:
+  /snapshot-stats/v1/domains/{domainId}/statistics:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve statistics by domain
+      description: |
+        Provides a real-time snapshot of statistics for all activities within the specified domain.
+      operationId: getStatisticsMetadata
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      responses:
+        "200":
+          description: Retrieve the metadata for each type of statistic.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionMetadata'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/statistics/acd-status:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve the ACD status for a domain
+      description: |
+        Retrieve a snapshot of the ACD status for the skills specified in the filters or for all of the skills assigned to the given domain.
+      operationId: getAcdStatus
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      - name: mediaTypes
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated media types for media type specific metrics
+          example: "VOICE,CHAT,EMAIL"
+      - name: filters
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated agent/campaign/skill IDs supported by the statistic
+            type
+      - name: pageLimit
+        in: query
+        description: The page limit. A maximum of 100 and may return less than requested.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+        example: 50
+      - name: pageCursor
+        in: query
+        description: The page cursor to retrieve a specified page of results.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: eyJxdWVyeURpZ2VzdCI6MCwicGFnZU9mZnNldCI6MSwiZGJDdXJzb3IiOiIifQ
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Field to sort the result order (use '-' to indicate descending
+            order)
+      responses:
+        "200":
+          description: Retrieve statistics for ACD status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcdStatusResponse'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/statistics/agent-state:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve agent states for a domain
+      description: |
+        Retrieve a snapshot of the agent state for the agents specified in the filter(s) or for all the agents assigned to the given domain.
+      operationId: getAgentState
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      - name: mediaTypes
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated media types for media type specific metrics
+          example: "VOICE,CHAT,EMAIL"
+      - name: filters
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated agent/campaign/skill IDs supported by the statistic
+            type
+      - name: pageLimit
+        in: query
+        description: The page limit. A maximum of 100 and may return less than requested.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+        example: 50
+      - name: pageCursor
+        in: query
+        description: The page cursor to retrieve a specified page of results.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: eyJxdWVyeURpZ2VzdCI6MCwicGFnZU9mZnNldCI6MSwiZGJDdXJzb3IiOiIifQ
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Field to sort the result order (use '-' to indicate descending
+            order)
+      responses:
+        "200":
+          description: Retrieve the current state of agents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStateResponse'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/statistics/queue-status:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve the Queue status for a domain
+      description: |
+        Retrieve a snapshot of the queue status for the queueIds specified in the filters or for all of the queueIds assigned to the given domain.
+      operationId: getQueueStatus
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      - name: mediaTypes
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated media types for media type specific metrics
+          example: "VOICE,CHAT,EMAIL"
+      - name: filters
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated agent/campaign/skill IDs supported by the statistic
+            type
+      - name: pageLimit
+        in: query
+        description: The page limit. A maximum of 100 and may return less than requested.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+        example: 50
+      - name: pageCursor
+        in: query
+        description: The page cursor to retrieve a specified page of results.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: eyJxdWVyeURpZ2VzdCI6MCwicGFnZU9mZnNldCI6MSwiZGJDdXJzb3IiOiIifQ
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Field to sort the result order (use '-' to indicate descending
+            order)
+      responses:
+        "200":
+          description: Retrieve statistics for Queue status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueueStatusResponse'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/statistics/interactions/user/{userUId}:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve user interactions
+      description: |
+        Provides a real-time view of interactions currently being handled to the specified user within the domain.
+      operationId: getAgentInteractions
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      - name: userUId
+        in: path
+        description: User UID.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+      - name: mediaTypes
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated media types for media type specific metrics
+          example: "VOICE,CHAT,EMAIL"
+      responses:
+        "200":
+          description: Retrieve the interactions assigned to a agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentInteractionsResponse'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/statistics/acd-interactions/skill/{skillId}:
+    get:
+      tags:
+      - statistics
+      summary: Retrieve ACD interaction details by skill.
+      description: |
+        Provides metrics and statuses for ACD interactions associated with the specified skill within the domain.
+      operationId: getAcdInteractions
+      parameters:
+      - name: domainId
+        in: path
+        description: Unique ID of the domain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+          example: "123456"
+      - name: skillId
+        in: path
+        description: Skill Id.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minLength: 1
+          type: string
+      - name: mediaTypes
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          description: Comma separated media types for media type specific metrics
+          example: "VOICE,CHAT,EMAIL"
+      - name: inQueue
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: "If set to true, retrieves chat/email/calls/vm in queue; otherwise,\
+            \ retrieves voicemails in progress. Default is true."
+          default: true
+      responses:
+        "200":
+          description: Retrieve the interactions assigned to a agent.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcdInteractionsResponse'
+        "401":
+          description: Authentication error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+      deprecated: false
+  /snapshot-stats/v1/domains/{domainId}/campaign-profiles/{campaignProfileId}/disposition-counts:
+    get:
+      tags:
+      - campaign-profiles
+      summary: Return the campaign profile disposition counts.
+      operationId: retrieveCampaignProfileDispositionCounts
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignProfileId
+        in: path
+        description: campaignProfileId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignProfileDispositionCriteria'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+    put:
+      tags:
+      - campaign-profiles
+      summary: Update the campaign profile disposition count.
+      operationId: updateCampaignProfileDispositionCounts
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignProfileId
+        in: path
+        description: campaignProfileId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: If-Match
+        in: header
+        description: "The 'If-Match' request header is used to make a conditional\
+          \ requests for updating or deleting a resource. <br />The 'If-Match' request\
+          \ header value(s) must match the conditional 'ETag' value retrieved from\
+          \ the GET response of the resource. <br/>To force **an unconditional update\
+          \ or delete**, do NOT include the 'If-Match' header in the request or set\
+          \ it to the wildcard value (&ast;) without quotes. <br />NOTE: The 'If-Match'\
+          \ request header values must be enclosed in double quotes, except for the\
+          \ special asterisk (&ast;) wildcard value that can be used to match any\
+          \ resource. <br/>NOTE: Weak entity-tags are NOT allowed in the 'If-Match'\
+          \ request header because they are not supported in this API implementation,\
+          \ as they will never be matched.<br/>"
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: '*'
+        examples:
+          single-value:
+            description: "A single value to match against, enclosed in quotes."
+            value: '"gyc13a654329c89090ef5b2c3930249c76ca92d62d"'
+          multiple-values:
+            description: "Multiple values to match against, each enclosed in quotes."
+            value: "\"17ab83\", \"54ed81\", \"7872vd\""
+          wildcard:
+            description: "The asterisk is a special value that can be used to match\
+              \ any resource. <br />NOTE: It must not be enclosed in quotes."
+            value: '*'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignProfileDispositionCriteria'
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignProfileDispositionCriteria'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+  /snapshot-stats/v1/domains/{domainId}/campaigns/{campaignId}/utilization-thresholds:
+    get:
+      tags:
+      - campaign-resources
+      summary: Retrieve the utilization threshold for inbound campaign notifications.
+      operationId: retrieveInboundCampaignUtilizationThreshold
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignId
+        in: path
+        description: campaignId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilizationThresholdSettings'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+    put:
+      tags:
+      - campaign-resources
+      summary: Update the utilization threshold for inbound campaign notifications.
+      operationId: updateInboundCampaignUtilizationThreshold
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignId
+        in: path
+        description: campaignId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UtilizationThresholdSettings'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UtilizationThresholdSettings'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+  /snapshot-stats/v1/domains/{domainId}/campaigns/{campaignId}/resource-limits:
+    get:
+      tags:
+      - campaign-resources
+      summary: Retrieve the inbound campaign resource limits.
+      operationId: retrieveInboundCampaignResourceLimits
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignId
+        in: path
+        description: campaignId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResourceLimits'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+    put:
+      tags:
+      - campaign-resources
+      summary: Update the inbound campaign resource limits.
+      operationId: updateInboundCampaignResourceLimits
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: campaignId
+        in: path
+        description: campaignId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignResourceLimits'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResourceLimits'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+  /snapshot-stats/v1/domains/{domainId}/domain-settings/email:
+    get:
+      tags:
+      - domain-settings
+      summary: Retrieve the domain utilization threshold for emails.
+      operationId: retrieveEmailUtilizationThresholds
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailUtilizationThresholdSettings'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+    put:
+      tags:
+      - domain-settings
+      summary: Update the domain utilization threshold for emails.
+      operationId: updateEmailUtilizationThresholds
+      parameters:
+      - name: domainId
+        in: path
+        description: domainId
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailUtilizationThresholdSettings'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailUtilizationThresholdSettings'
+        "400":
+          description: Indicates error in the request caused by client.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "403":
+          description: Access is denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "404":
+          description: The specified resource was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "429":
+          description: "Too many requests, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "500":
+          description: Indicates error on server side.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+        "503":
+          description: "Service unavailable, retry the request only after `RetryAfter`\
+            \ if present"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TraceableHttpError'
+components:
+  schemas:
+    SubscriptionMetadata:
+      type: array
+      description: The subscription metadata for each statistics type.
+      items:
+        $ref: '#/components/schemas/MetadataSchema'
+    MetadataSchema:
+      type: object
+      properties:
+        statisticsType:
+          type: string
+          description: The statistic type name.
+        statisticsClass:
+          type: string
+          description: Snapshot (real-time) category
+        fields:
+          type: array
+          description: The supported list of fields.
+          items:
+            $ref: '#/components/schemas/FieldSchema'
+        filters:
+          type: array
+          description: The supported filters.
+          items:
+            $ref: '#/components/schemas/FilterSchema'
+        aggregations:
+          type: array
+          description: The supported aggregations.
+          items:
+            $ref: '#/components/schemas/AggregationSchema'
+        defaultAggregation:
+          $ref: '#/components/schemas/AggregationSchema'
+    FieldSchema:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Represents the field/metric name.
+        title:
+          type: string
+          description: Title of the field/metric name.
+        type:
+          type: string
+          description: Data type of the field/metric.
+        format:
+          type: string
+          description: Format of the field/metric.
+        displayFormat:
+          type: string
+          description: Display Format of the field/metric.
+        description:
+          type: string
+          description: The description of the field/metric.
+    FilterSchema:
+      type: object
+      properties:
+        field:
+          type: string
+          description: The field where the filter can be applied.
+        description:
+          type: string
+          description: The description of the field on which to filter.
+    AggregationSchema:
+      type: object
+      properties:
+        field:
+          type: string
+          description: The field on which grouping is allowed.
+        description:
+          type: string
+          description: The description of the field on which to group by.
+        extraFields:
+          type: array
+          description: Extra aggregation fields.
+          items:
+            $ref: '#/components/schemas/AggregationExtraFieldSchema'
+      description: Aggregation that is applied to given statistic type.
+    AggregationExtraFieldSchema:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Supported additional aggregation field.
+        description:
+          type: string
+          description: The description of the extra aggregation field.
+      description: Defines additional aggregation field included in aggregated statistic
+        data for the specified statistic type.
+    PageDetails:
+      type: object
+      properties:
+        next:
+          type: string
+          description: URL of next page
+        limit:
+          minimum: 1
+          type: integer
+          description: Max result size
+      description: Page details object
+    AcdStatusResponse:
+      type: object
+      properties:
+        domainId:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcdStatus'
+        paging:
+          $ref: '#/components/schemas/PageDetails'
+      description: Response containing all the snapshot statistics supported under
+        ACD Status.
+    QueueStatusResponse:
+      type: object
+      properties:
+        domainId:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueStatus'
+        paging:
+          $ref: '#/components/schemas/PageDetails'
+      description: Response containing all the snapshot statistics supported under
+        Queue Status.
+    AgentStateResponse:
+      type: object
+      properties:
+        domainId:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentState'
+        paging:
+          $ref: '#/components/schemas/PageDetails'
+      description: Response containing all the snapshot statistics supported under
+        Agent State.
+    AgentInteractionsResponse:
+      type: object
+      properties:
+        domainId:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentInteractions'
+      description: Response containing all the snapshot statistics supported under
+        Agent Interactions.
+    AcdInteractionsResponse:
+      type: object
+      properties:
+        domainId:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AcdInteractions'
+      description: Response containing all the snapshot statistics supported under
+        ACD Interactions for a given skill.
+    AcdStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Skill Id.
+        activeCalls:
+          type: integer
+          description: Count of calls currently active.
+        agentsActive:
+          type: integer
+          description: Count of agent Logged into agent desktop for selected skill(s).
+            Could be ready or not ready.
+        agentsLoggedIn:
+          type: integer
+          description: Count of agents that are logged in but haven't selected a skill
+            yet.
+        agentsNotReadyForChats:
+          type: integer
+          description: Count of agents that are not ready for chats.
+        agentsNotReadyForEmails:
+          type: integer
+          description: Count of agents that are not ready for emails.
+        agentsNotReadyForVoice:
+          type: integer
+          description: Count of agents that are not ready for calls.
+        agentsNotReadyForVoicemails:
+          type: integer
+          description: Count of agents that are not ready for voicemails.
+        agentsOnAcw:
+          type: integer
+          description: Count of agents on After Call Work (ACW).
+        agentsOnCall:
+          type: integer
+          description: Count of agents on call.
+        agentsOnCase:
+          type: integer
+          description: Count of agents assigned a case interaction.
+        agentsOnChat:
+          type: integer
+          description: Count of agents assigned a chat interaction that does not have
+            a closed disposition.
+        agentsOnEmail:
+          type: integer
+          description: Count of agents assigned a email interaction that does not
+            have a closed disposition.
+        agentsOnGenericChat:
+          type: integer
+          description: Count of agents assigned a generic chat interaction that does
+            not have a closed disposition.
+        agentsOnPreviewChat:
+          type: integer
+          description: Count of agents assigned a preview chat interaction that does
+            not have a closed disposition.
+        agentsOnProactiveChat:
+          type: integer
+          description: Count of agents assigned a proactive chat interaction that
+            does not have a closed disposition.
+        agentsOnSmsChat:
+          type: integer
+          description: Count of agents assigned an SMS chat interaction that does
+            not have a closed disposition.
+        agentsOnCrmChat:
+          type: integer
+          description: Count of agents assigned a CRM chat interaction that does not
+            have a closed disposition.
+        agentsOnOutboundSmsChat:
+          type: integer
+          description: Count of agents assigned an outbound SMS chat interaction that
+            does not have a closed disposition.
+        agentsOnVideoChat:
+          type: integer
+          description: Count of agents assigned a video chat interaction that does
+            not have a closed disposition.
+        agentsOnSocial:
+          type: integer
+          description: "[NOT IMPLEMENTED YET] Count of agents assigned to at least\
+            \ one Social interaction that is not closed."
+        agentsOnParkedEmail:
+          type: integer
+          description: Count of all the agents currently on parked email.
+        agentsOnVM:
+          type: integer
+          description: Count of agents processing a VM (skill VM or personal).
+        agentsReadyForChat:
+          type: integer
+          description: Count of agents available for chats.
+        agentsReadyForEmails:
+          type: integer
+          description: Count of agents available for emails.
+        agentsReadyForVoice:
+          type: integer
+          description: Count of agents who are in Ready state for Voice channel.
+        agentsReadyForVoicemail:
+          type: integer
+          description: Count of agents in Ready state for Voicemail.
+        agentsWithAssignedTextInteraction:
+          type: integer
+          description: Count of agents with at least one text interaction assigned
+            via AID or cherry pick mode.
+        availableAgents:
+          type: integer
+          description: Count of agent logged in and are in Ready state.
+        callbacksInQueue:
+          type: integer
+          description: Count of callbacks in queue.
+        callsInQueue:
+          type: integer
+          description: Count of calls in queue waiting to be transferred to agents.
+        callsOnHold:
+          type: integer
+          description: Count of calls currently on hold.
+        casesInQueue:
+          type: integer
+          description: Count of case interactions currently in queue.
+        chatsInQueue:
+          type: integer
+          description: Count of chat interactions currently in queue.
+        cumulativeLongestQueueTime:
+          type: string
+          description: Timestamp of the current longest interaction in queue.
+          format: date-time
+        cumulativeCurrentLongestQueueTime:
+          type: string
+          description: Timestamp of the cumulative current longest interaction in
+            queue.
+          format: date-time
+        currentLongestActiveCall:
+          type: string
+          description: Timestamp of the oldest active call.
+          format: date-time
+        longestAvailableAgent:
+          type: string
+          description: Timestamp of an agent that is available for the longest time.
+          format: date-time
+        currentLongestCallInQueue:
+          type: string
+          description: Timestamp of the oldest call currently in the queue.
+          format: date-time
+        currentLongestCallOnHold:
+          type: string
+          description: Timestamp of the oldest call currently on hold.
+          format: date-time
+        currentLongestQueueTimeForCase:
+          type: string
+          description: Timestamp of the oldest case currently in queue.
+          format: date-time
+        currentLongestQueueTimeForChat:
+          type: string
+          description: Timestamp of the oldest chat currently in queue.
+          format: date-time
+        currentLongestQueueTimeForEmail:
+          type: string
+          description: Timestamp of the oldest email currently in queue.
+          format: date-time
+        currentLongestQueueTimeForPreviewChat:
+          type: string
+          description: Timestamp of the oldest preview chat currently in queue.
+          format: date-time
+        currentLongestQueueTimeForProactiveChat:
+          type: string
+          description: Timestamp of the oldest proactive chat currently in queue.
+          format: date-time
+        currentLongestQueueTimeForSMS:
+          type: string
+          description: Timestamp of the oldest sms currently in queue.
+          format: date-time
+        currentLongestQueueTimeForSocial:
+          type: string
+          description: "[NOT IMPLEMENTED YET] Timestamp of the oldest social currently\
+            \ in queue."
+          format: date-time
+        currentLongestQueueTimeForVideo:
+          type: string
+          description: Timestamp of the oldest Video currently in queue.
+          format: date-time
+        emailsInQueue:
+          type: integer
+          description: Count of email interactions currently in queue.
+        previewChatsInQueue:
+          type: integer
+          description: Count of preview chat interactions currently in queue.
+        proactiveChatsInQueue:
+          type: integer
+          description: Count of proactive chat interactions currently in queue.
+        smsInQueue:
+          type: integer
+          description: Count of SMS chats in queue.
+        totalTextInteractionsInQueue:
+          type: integer
+          description: Count of text interactions currently in queue.
+        videosInQueue:
+          type: integer
+          description: Count of video chats in queue.
+        vivrCallsInQueue:
+          type: integer
+          description: Count of calls that originated from Visual IVR scripts that
+            are waiting to be transferred to agents.
+        voicemailsInProgress:
+          type: integer
+          description: Count of voicemail messages being processed by agents.
+        voicemailsInQueue:
+          type: integer
+          description: Count of voicemail messages waiting to be processed by agents.
+        voicemailsTotal:
+          type: integer
+          description: Count of voicemail messages.
+      description: ACD Status provides snapshot metrics aggregated by skillId.
+    QueueStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Queue Id.
+        callbacksInQueue:
+          type: integer
+          description: Count of callbacks in queue.
+        callsInQueue:
+          type: integer
+          description: Count of calls currently in Queue.
+        currentLongestCallInQueue:
+          type: string
+          description: Timestamp of the oldest call currently in the queue.
+          format: date-time
+        cumulativeCurrentLongestQueueTime:
+          type: string
+          description: Timestamp of the cumulative longest call currently in the queue.
+          format: date-time
+      description: Queue Status provides snapshot metrics aggregated by queueId.
+    AgentState:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Agent UID
+        presenceState:
+          type: string
+          description: Presence State specifies if a Agent is Ready or Not Ready
+        stateSince:
+          type: string
+          description: State Since
+          format: date-time
+        callType:
+          type: string
+          description: Call Type
+        chatInteractionState:
+          type: string
+          description: Interaction State (Chat)
+        emailInteractionState:
+          type: string
+          description: Interaction State (Email)
+        mediaAvailability:
+          type: array
+          description: Media Availability
+          items:
+            type: string
+        reasonCode:
+          type: string
+          description: Reason Code
+        reasonSince:
+          type: string
+          description: Reason Since
+          format: date-time
+        aidMode:
+          type: array
+          description: Channels with interactions assigned automatically
+          items:
+            type: string
+        voiceInteractionState:
+          type: string
+          description: Interaction State (Voice)
+        voicemailInteractionState:
+          type: string
+          description: Interaction State (Voicemail)
+        customerName:
+          type: string
+          description: "Customer's first and last name from contacts database based\
+            \ on ANI (Inbound call or text SMS), DNIS (Outbound call or text SMS)"
+        campaignIds:
+          type: array
+          description: Comma separated list of campaignIds for all interactions being
+            handled by an agent at the given time
+          items:
+            type: string
+        skillId:
+          type: array
+          description: Skill ID
+          items:
+            type: string
+        skillAvailability:
+          type: array
+          description: Queue IDs selected by the agent during login for which agent
+            is available.
+          items:
+            type: string
+        onHoldStateSince:
+          type: string
+          description: Timestamp since the agent went on Hold.
+          format: date-time
+        onParkStateSince:
+          type: string
+          description: Timestamp since the agent went on Park.
+          format: date-time
+        afterCallWorkStateSince:
+          type: string
+          description: Timestamp since the agent entered the ACW state.
+          format: date-time
+        loggedOutStateSince:
+          type: string
+          description: Timestamp from when the agent logged out.
+          format: date-time
+        readyStateSince:
+          type: string
+          description: Timestamp since the agent entered the Ready state.
+          format: date-time
+        notReadyStateSince:
+          type: string
+          description: Timestamp since the agent entered the Not Ready state.
+          format: date-time
+        onCallStateSince:
+          type: string
+          description: Timestamp since the agent is on Call.
+          format: date-time
+        onChatStateSince:
+          type: string
+          description: Timestamp since the agent is on Chat.
+          format: date-time
+        parkedEmailStateSince:
+          type: string
+          description: Timestamp since the agent parked the email.
+          format: date-time
+        currentChatsCount:
+          type: integer
+          description: Count of all the chats assigned to the agent.
+        currentVideoChatsCount:
+          type: integer
+          description: Count of all the Video chats assigned to the agent.
+        currentEmailsCount:
+          type: integer
+          description: Count of all the emails assigned to the agent.
+        currentCasesCount:
+          type: integer
+          description: Count of all the cases assigned to the agent.
+        currentParkedCallsCount:
+          type: integer
+          description: Count of all the calls parked by an agent.
+        currentParkedEmailsCount:
+          type: number
+          description: Count of parked emails assigned to the agent.
+        voiceCAP:
+          type: number
+          description: Percentage of assigned voice interactions / allowed voice interactions.
+          format: double
+        voicemailCAP:
+          type: number
+          description: Percentage of assigned voicemail interactions / allowed voicemail
+            interactions.
+          format: double
+        chatCAP:
+          type: number
+          description: Percentage of assigned chat interactions / allowed chat interactions.
+          format: double
+        emailCAP:
+          type: number
+          description: Percentage of assigned email interactions / allowed email interactions.
+          format: double
+        videoCAP:
+          type: number
+          description: Percentage of assigned video interactions / allowed video interactions.
+          format: double
+        totalCAP:
+          type: number
+          description: Percentage of assigned interactions / allowed interactions.
+          format: double
+        voiceWL:
+          type: string
+          description: Ratio of assigned voice interactions / allowed voice interactions.
+        voicemailWL:
+          type: string
+          description: Ratio of assigned voicemail interactions / allowed voicemail
+            interactions.
+        chatWL:
+          type: string
+          description: Ratio of assigned chat interactions / allowed chat interactions.
+        emailWL:
+          type: string
+          description: Ratio of assigned email interactions / allowed email interactions.
+        videoWL:
+          type: string
+          description: Ratio of assigned video interactions / allowed video interactions.
+        totalWL:
+          type: string
+          description: Ratio of assigned total interactions / allowed total interactions.
+        parkedEmailWL:
+          type: string
+          description: Ratio of assigned parked email / allowed parked email interactions.
+      description: Agent state provides snapshot metrics aggregated by agent IDs.
+    AgentInteractions:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Interaction Id.
+        skillId:
+          type: string
+          description: Skill Id.
+        campaignId:
+          type: string
+          description: Campaign Id.
+        contactId:
+          type: string
+          description: Contact Id.
+        customerName:
+          type: string
+          description: "Customer's first and last name from contacts database based\
+            \ on ANI (Inbound call or text SMS), DNIS (Outbound call or text SMS)"
+        customerEmail:
+          type: string
+          description: Customer's email.
+        media:
+          type: string
+          description: Interaction media.
+        mediaType:
+          type: string
+          description: Interaction media type.
+        vendor:
+          type: string
+          description: Interaction Vendor.
+        acdMode:
+          type: string
+          description: Automatic distribution or manual choice for chat.
+        to:
+          type: string
+          description: Email or chat recipient.
+        from:
+          type: string
+          description: Email or chat sender.
+        subject:
+          type: string
+          description: Email or chat subject.
+        priority:
+          type: string
+          description: Priority of current interaction.
+        transferCount:
+          type: integer
+          description: Count of times that the interaction was transferred.
+        state:
+          type: string
+          description: State of the current interaction.
+        createTimestamp:
+          type: string
+          description: Timestamp of the interaction creation event.
+          format: date-time
+        assignTimestamp:
+          type: string
+          description: Timestamp when the interaction was assigned to agent.
+          format: date-time
+        firstResponseTimestamp:
+          type: string
+          description: Timestamp of the first response to the interaction.
+          format: date-time
+        dispositionTimestamp:
+          type: string
+          description: Timestamp of interaction disposition.
+          format: date-time
+        offerExpirationTimestamp:
+          type: string
+          description: Timestamp of the expiration of the offer.
+          format: date-time
+        agentFirstResponseTimestamp:
+          type: string
+          description: Timestamp of the agent first response to the interaction.
+          format: date-time
+        queuedTimestamp:
+          type: string
+          description: Timestamp when the interaction was put in the queue.
+          format: date-time
+        requeueTimestamp:
+          type: string
+          description: Timestamp when the interaction will be requeue.
+          format: date-time
+        parkedTimestamp:
+          type: string
+          description: Timestamp when the interaction was parked by agent.
+          format: date-time
+        parkedExpiration:
+          type: string
+          description: Timestamp when the parked email will expire.
+          format: date-time
+        openDispositionId:
+          type: string
+          description: Open Disposition Id.
+      description: Agent Interactions provides snapshot of active interaction details
+        for an agent
+    AcdInteractions:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Interaction Id.
+        skillId:
+          type: string
+          description: Skill Id.
+        campaignId:
+          type: string
+          description: Campaign Id.
+        contactId:
+          type: string
+          description: Contact Id.
+        customerName:
+          type: string
+          description: "Customer's first and last name from contacts database based\
+            \ on ANI (Inbound call or text SMS), DNIS (Outbound call or text SMS)"
+        customerNumber:
+          type: string
+          description: Customer's number.
+        customerEmail:
+          type: string
+          description: Customer's email.
+        media:
+          type: string
+          description: Interaction media.
+        mediaType:
+          type: string
+          description: Interaction media type.
+        priority:
+          type: string
+          description: Priority of current interaction.
+        subject:
+          type: string
+          description: Email or chat subject.
+        to:
+          type: string
+          description: Email or chat recipient.
+        transferCount:
+          type: integer
+          description: Count of times that the interaction was transferred.
+        queuedTimestamp:
+          type: string
+          description: Timestamp since the interaction last entered the queue.
+          format: date-time
+        inQueueCallback:
+          type: boolean
+          description: Specifies if the call is registered for callback and is in
+            callback queue.
+        createTimestamp:
+          type: string
+          description: Timestamp of when the interaction was created.
+          format: date-time
+      description: Agent Interactions provides snapshot of active interaction details
+        for an agent
+    UtilizationThresholdSettings:
+      type: object
+      properties:
+        alertingThreshold:
+          type: integer
+        alertingRecipients:
+          type: string
+        domain:
+          $ref: '#/components/schemas/DomainRef'
+        campaignId:
+          type: string
+    CampaignResourceLimits:
+      type: object
+      properties:
+        maxNumOfVoiceLines:
+          type: integer
+        maxNumOfVivrSessions:
+          type: integer
+        maxNumOfTextInteractions:
+          type: integer
+        domain:
+          $ref: '#/components/schemas/DomainRef'
+        campaignId:
+          type: string
+    CampaignProfileDispositionCriteria:
+      type: object
+      properties:
+        criteria:
+          maxItems: 1000
+          type: array
+          description: The disposition criteria.
+          items:
+            $ref: '#/components/schemas/DispositionCount'
+      example:
+        criteria:
+        - count: 2
+          dispositions:
+          - dispositionId: "111"
+            uri: /v1/domains/42/dispositions/111
+          - dispositionId: "222"
+            uri: /v1/domains/42/dispositions/222
+        - count: 7
+          dispositions:
+          - dispositionId: "333"
+            uri: /v1/domains/42/dispositions/333
+          - dispositionId: "444"
+            uri: /v1/domains/42/dispositions/444
+    DispositionCount:
+      required:
+      - count
+      - dispositions
+      type: object
+      properties:
+        count:
+          maximum: 2147483647
+          minimum: 1
+          type: integer
+          description: The disposition count.
+          format: int32
+        dispositions:
+          maxItems: 1000
+          minItems: 1
+          type: array
+          description: The list of disposition references associated with a particular
+            count.
+          items:
+            $ref: '#/components/schemas/DispositionReference'
+      description: "This feature allows you to automatically stop an inbound or outbound\
+        \ campaign once the specified disposition has been selected a specified number\
+        \ of times. <br />For example, if you have 100 items to sell, set the Disposition\
+        \ Count to 100 to automatically stop dialing once the Sales disposition has\
+        \ been selected 100 times. Set a Disposition Count equal to your product inventory.\
+        \ <p>This feature can be used for things such as managing inventory, mailing\
+        \ applications or fliers, or limiting appointments based on staffing, etc.</p>"
+    DispositionReference:
+      required:
+      - dispositionId
+      type: object
+      properties:
+        dispositionId:
+          minLength: 1
+          type: string
+          description: The unique identifier for this disposition.
+        uri:
+          type: string
+          description: "<b>[Output Only]</b> The URI reference to this disposition."
+          readOnly: true
+      description: The URI reference to a disposition.
+    EmailUtilizationThresholdSettings:
+      type: object
+      properties:
+        alertingThreshold:
+          type: integer
+        alertingRecipients:
+          type: string
+        domain:
+          $ref: '#/components/schemas/DomainRef'
+    DomainRef:
+      type: object
+      properties:
+        domainId:
+          type: string
+          description: The domain identifier
+        uri:
+          type: string
+          description: The URI to the domain resource
+      description: A reference to a domain
+    TraceableHttpError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/HttpErrorDetail'
+        message:
+          type: string
+        traceId:
+          type: string
+    HttpErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        localizedMessage:
+          type: string
+        message:
+          type: string
+  responses:
+    BadRequest:
+      description: Indicates error in the request caused by client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    Forbidden:
+      description: Access is denied.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    InternalServerError:
+      description: Indicates error on server side.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    NotFound:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    Unauthorized:
+      description: Authentication error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    TooManyRequests:
+      description: "Too many requests, retry the request only after `RetryAfter` if\
+        \ present"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+    ServiceUnavailable:
+      description: "Service unavailable, retry the request only after `RetryAfter`\
+        \ if present"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TraceableHttpError'
+  parameters:
+    domainId:
+      name: domainId
+      in: path
+      description: Unique ID of the domain.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        minLength: 1
+        type: string
+        example: "123456"
+    userUId:
+      name: userUId
+      in: path
+      description: User UID.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        minLength: 1
+        type: string
+    skillId:
+      name: skillId
+      in: path
+      description: Skill Id.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        minLength: 1
+        type: string
+    filters:
+      name: filters
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        description: Comma separated agent/campaign/skill IDs supported by the statistic
+          type
+    pageLimit:
+      name: pageLimit
+      in: query
+      description: The page limit. A maximum of 100 and may return less than requested.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+        format: int32
+      example: 50
+    pageCursor:
+      name: pageCursor
+      in: query
+      description: The page cursor to retrieve a specified page of results.
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: eyJxdWVyeURpZ2VzdCI6MCwicGFnZU9mZnNldCI6MSwiZGJDdXJzb3IiOiIifQ
+    mediaTypes:
+      name: mediaTypes
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        description: Comma separated media types for media type specific metrics
+        example: "VOICE,CHAT,EMAIL"
+    inQueue:
+      name: inQueue
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: boolean
+        description: "If set to true, retrieves chat/email/calls/vm in queue; otherwise,\
+          \ retrieves voicemails in progress. Default is true."
+        default: true
+    sort:
+      name: sort
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+        description: Field to sort the result order (use '-' to indicate descending
+          order)
+    If-Match:
+      name: If-Match
+      in: header
+      description: "The 'If-Match' request header is used to make a conditional requests\
+        \ for updating or deleting a resource. <br />The 'If-Match' request header\
+        \ value(s) must match the conditional 'ETag' value retrieved from the GET\
+        \ response of the resource. <br/>To force **an unconditional update or delete**,\
+        \ do NOT include the 'If-Match' header in the request or set it to the wildcard\
+        \ value (&ast;) without quotes. <br />NOTE: The 'If-Match' request header\
+        \ values must be enclosed in double quotes, except for the special asterisk\
+        \ (&ast;) wildcard value that can be used to match any resource. <br/>NOTE:\
+        \ Weak entity-tags are NOT allowed in the 'If-Match' request header because\
+        \ they are not supported in this API implementation, as they will never be\
+        \ matched.<br/>"
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
+        default: '*'
+      examples:
+        single-value:
+          description: "A single value to match against, enclosed in quotes."
+          value: '"gyc13a654329c89090ef5b2c3930249c76ca92d62d"'
+        multiple-values:
+          description: "Multiple values to match against, each enclosed in quotes."
+          value: "\"17ab83\", \"54ed81\", \"7872vd\""
+        wildcard:
+          description: "The asterisk is a special value that can be used to match\
+            \ any resource. <br />NOTE: It must not be enclosed in quotes."
+          value: '*'
+  headers:
+    ETag:
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
