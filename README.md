@@ -19,7 +19,7 @@ pip install five9-stats
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/five9-stats.git
+git clone https://github.com/james-smart/five9-stats.git
 cd five9-stats
 pip install -e .
 ```
