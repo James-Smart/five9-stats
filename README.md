@@ -32,6 +32,8 @@ pip install -e .
 
 ## Usage
 
+See the included exmple.py script for a complete example of how to use the library.
+
 ### Interval Statistics API
 
 The Interval Statistics API provides historical statistics for domains, agents, campaigns, and ACD.
