@@ -7,11 +7,11 @@ setup(
     name="five9-stats",
     version="0.1.0",
     author="Five9 Stats Library",
-    author_email="example@example.com",
+    author_email="james.smart@five9.com",
     description="Python client library for Five9 Statistics APIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/five9-stats",
+    url="https://github.com/JamesSmart/five9-stats",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

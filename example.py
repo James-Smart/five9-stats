@@ -2,6 +2,8 @@
 Example script demonstrating how to use the Five9 Statistics API client library.
 
 This script shows how to use both the Interval Statistics API and the Real-time Stats Snapshot API.
+
+install package with pip install five9-stats
 """
 
 import asyncio
